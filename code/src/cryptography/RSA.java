@@ -10,7 +10,7 @@ import javax.crypto.*;
 
 public class RSA {
 	private Cipher rsaCipher;
-	KeyPairGenerator keypairgenerator;
+	private KeyPairGenerator keypairgenerator;
 	private final String INSTANCE_CYPHER = "RSA/ECB/PKCS1Padding";
 	
 	RSA() throws NoSuchAlgorithmException, NoSuchPaddingException{

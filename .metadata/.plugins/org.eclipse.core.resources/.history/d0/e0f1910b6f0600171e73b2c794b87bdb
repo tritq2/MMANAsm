@@ -1,0 +1,79 @@
+package cryptography;
+import java.security.InvalidAlgorithmParameterException;
+
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.networking.tags.enCode;
+
+import cryptography.Convert;
+public final class DES {
+	private static Cipher desCipher;
+	private static KeyGenerator keygenerator;
+	private static byte[] iv ;
+	private static String INSTANCE_CYPHER = "DES/CBC/PKCS5Padding";
+	 
+	private DES() throws NoSuchAlgorithmException, NoSuchPaddingException{
+		keygenerator = KeyGenerator.getInstance("DES");
+		desCipher = Cipher.getInstance(INSTANCE_CYPHER);
+		
+	}
+	
+	public static Key generateKey(){
+		    return keygenerator.generateKey();
+	}
+	
+	
+	public static byte[] getIv() {
+		return iv;
+	}
+
+	public static void setIv(byte[] iv) {
+		DES.iv = iv;
+	}
+
+	public static byte[] encrypt(byte[] plaintext, Key key) throws NoSuchAlgorithmException, 
+	NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,BadPaddingException{
+		 desCipher.init(Cipher.ENCRYPT_MODE, key);
+		 setIv(desCipher.getIV());
+		 return desCipher.doFinal(plaintext);
+	}
+	
+	public static byte[] decrypt(byte[] ciphertext, Key key, IvParameterSpec iv) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException{
+		desCipher.init(Cipher.DECRYPT_MODE, key, iv);
+		return desCipher.doFinal(ciphertext);
+	}
+	
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException{
+		
+		/*DES des = new DES();
+		Key key = des.generateKey();
+		String plain = "haha";
+		byte[] cipher = des.encrypt("haha".getBytes(), key);
+		byte[] p = des.decrypt(cipher, key, des.getIv());
+		System.out.println("plain: " + new String(p));
+		*/
+		
+		Key key = DES.generateKey();
+		String plaintext = "I'm vuthede";
+	//	byte[] key_byte = Convert.Key2Bytes(key);
+		//byte[] cbyte = DES.encrypt(plaintext.getBytes(), key);
+		//byte[] iv_byte = DES.getIv();
+		
+		//String ctext = new String(DES.decrypt(cbyte, Convert.Bytes2Key(key_byte, "DES"), Convert.Bytes2Iv(iv_byte)));
+		//System.out.println(ctext);
+		
+		
+	}
+}
+
+
+
+
+

@@ -15,7 +15,7 @@ import javax.crypto.spec.IvParameterSpec;
 public class AES {
 	private Cipher aesCipher;
 	private KeyGenerator keygenerator;
-	private byte[] iv ;
+	private IvParameterSpec iv ;
 	private final String INSTANCE_CYPHER = "AES/CBC/PKCS5Padding";
 
 	AES() throws NoSuchAlgorithmException, NoSuchPaddingException{
@@ -28,25 +28,24 @@ public class AES {
 		return keygenerator.generateKey();
 	}
 
-	public byte[] getIv() {
+	public IvParameterSpec getIv() {
 		return iv;
 	}
 
-	public void setIv(byte[] iv) {
-		this.iv = iv;
+	public void setIv(IvParameterSpec Iv) {
+		this.iv = Iv;
 	}
 
 	public byte[] encrypt(byte[] plaintext, Key key) throws NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		aesCipher.init(Cipher.ENCRYPT_MODE, key);
-		setIv(aesCipher.getIV());
+		setIv(Convert.Bytes2Iv(aesCipher.getIV()));
 		return aesCipher.doFinal(plaintext);
 	}
 
-	public byte[] decrypt(byte[] ciphertext, Key key, byte[] iv )
+	public byte[] decrypt(byte[] ciphertext, Key key, IvParameterSpec Iv )
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
-	    IvParameterSpec dps = new IvParameterSpec(iv);
-		aesCipher.init(Cipher.DECRYPT_MODE, key, dps);
+		aesCipher.init(Cipher.DECRYPT_MODE, key, Iv);
 		return aesCipher.doFinal(ciphertext);
 	}
 	

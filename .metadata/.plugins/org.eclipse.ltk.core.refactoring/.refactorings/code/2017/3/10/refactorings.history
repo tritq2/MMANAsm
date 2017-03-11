@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename compilation unit &apos;cryptography.convert.java&apos; to &apos;Convert.java&apos;&#x0D;&#x0A;- Original project: &apos;code&apos;&#x0D;&#x0A;- Original element: &apos;cryptography.convert.java&apos;&#x0D;&#x0A;- Renamed element: &apos;cryptography.Convert.java&apos;" description="Rename compilation unit &apos;convert.java&apos;" flags="2" id="org.eclipse.jdt.ui.rename.compilationunit" input="/src&lt;cryptography{convert.java" name="Convert.java" references="false" stamp="1489242123503" version="1.0"/>
+</session>
