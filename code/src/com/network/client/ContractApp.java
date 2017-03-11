@@ -10,6 +10,7 @@ import javax.swing.UIManager;
 
 import java.awt.TextArea;
 
+import javax.crypto.SecretKey;
 import javax.swing.JButton;
 
 import com.networking.tags.Tags;
@@ -34,7 +35,7 @@ public class ContractApp {
     private JButton btnChat, btnExit;
     private JButton button;
     private String IPserver ="";
-
+    private static SecretKey keyToEnCode;
     private ObjectInputStream input;
     private ObjectOutputStream output;
     public static ArrayList<DataPeer> peer_data = null;
@@ -57,12 +58,13 @@ public class ContractApp {
     	this.IPserver = IPs;
     }
     
-    public ContractApp(String arg, int arg1, String name, String msg,final String IPSer)
+    public ContractApp(String arg, int arg1, String name, String msg,final String IPSer, SecretKey key)
             throws Exception {
         IPClient = arg;
         portClient = arg1;
         nameUser = name;
         dataUser = msg;
+        keyToEnCode = key;
         set_IPServer(IPSer);
         
         

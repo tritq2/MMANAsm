@@ -4,6 +4,7 @@ import com.network.client.ContractApp;
 import com.networking.tags.DeCode;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.util.Base64;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JButton;
 import javax.swing.UIManager;
 
@@ -133,11 +136,14 @@ public class Login {
                             String port = DeCode.portOnl(msg);
                             String msg1 = (String) serverInputStream.readObject();
                             
+                            byte[] decodedKey = Base64.getDecoder().decode(pass);
+                            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
+
                             socketClient.close();
                             serverInputStream.close();
                             serverOutputStream.close();
                             contract = new ContractApp(InetAddress.getLocalHost().getHostAddress()
-                                    , Integer.parseInt(port), name, msg1, get_IP());
+                                    , Integer.parseInt(port), name, msg1, get_IP(),originalKey);
                             frmLogin.dispose();
                         }
 

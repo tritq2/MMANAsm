@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import javax.swing.JProgressBar;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 public class ChatApp {
 
@@ -123,7 +124,7 @@ public class ChatApp {
 		}
 		frame = new JFrame();
 		frame.setResizable(false);
-		frame.setBounds(100, 100, 588, 559);
+		frame.setBounds(100, 100, 606, 584);
 		frame.getContentPane().setLayout(null);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -144,7 +145,7 @@ public class ChatApp {
 		frame.getContentPane().add(textDisPlayChat);
 
 		panelFile = new JPanel();
-		panelFile.setBounds(6, 439, 568, 60);
+		panelFile.setBounds(6, 439, 568, 80);
 		panelFile.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "File"));
 		frame.getContentPane().add(panelFile);
 		panelFile.setLayout(null);
@@ -196,6 +197,45 @@ public class ChatApp {
 		Label label = new Label("Path : ");
 		label.setBounds(10, 21, 49, 22);
 		panelFile.add(label);
+		
+		JRadioButton rdbtnAlg = new JRadioButton("DES");
+		rdbtnAlg.setSelected(true);
+		rdbtnAlg.setBounds(80, 50, 109, 23);
+		panelFile.add(rdbtnAlg);
+		
+		JRadioButton rdbtnNewRadioButton_1 = new JRadioButton("AES");
+		rdbtnNewRadioButton_1.setBounds(191, 50, 109, 23);
+		panelFile.add(rdbtnNewRadioButton_1);
+		
+		JButton btnEncrypt = new JButton("Encrypt");
+		btnEncrypt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				// code encrypt here:
+				String path = textPath.getText();
+				//File fileData = new File(path);
+				if(path == null ||path.equals("")){
+					Tags.show(frame,"You haven't choosen file to encrypt yet!", false);
+					return;
+				}
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				int result = fileChooser.showSaveDialog(frame);
+				
+				if (result == JFileChooser.APPROVE_OPTION) {
+					String pathSaveEncryptFile = fileChooser.getSelectedFile().getAbsolutePath();
+					
+					System.console().printf(pathSaveEncryptFile);
+					return;
+				}
+			}
+		});
+		btnEncrypt.setBounds(397, 49, 72, 25);
+		panelFile.add(btnEncrypt);
+		
+		JButton btnDecrypt = new JButton("Decrypt");
+		btnDecrypt.setBounds(473, 50, 72, 23);
+		panelFile.add(btnDecrypt);
 
 		panelMessage = new JPanel();
 		panelMessage.setBounds(6, 363, 568, 71);
@@ -293,7 +333,7 @@ public class ChatApp {
 		frame.getContentPane().add(btnDisConnect);
 
 		progressSendFile = new JProgressBar(0, 100);
-		progressSendFile.setBounds(93, 510, 388, 14);
+		progressSendFile.setBounds(93, 530, 388, 14);
 		progressSendFile.setStringPainted(true);
 		frame.getContentPane().add(progressSendFile);
 		progressSendFile.setVisible(false);
@@ -304,7 +344,7 @@ public class ChatApp {
 		frame.getContentPane().add(textState);
 
 		lblReceive = new Label("Receiving ...");
-		lblReceive.setBounds(491, 510, 83, 14);
+		lblReceive.setBounds(487, 530, 83, 14);
 		lblReceive.setVisible(false);
 		frame.getContentPane().add(lblReceive);
 
