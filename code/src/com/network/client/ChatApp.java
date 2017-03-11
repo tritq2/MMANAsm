@@ -343,7 +343,7 @@ public class ChatApp {
 							connect.close();
 							break;
 						}
-						if (DeCode.checkFile(msgObj)) {
+						if (DeCode.checkFile(msgObj)) { // receive file
 							isReceiveFile = true;
 							nameFileReceive = msgObj.substring(10, msgObj.length() - 11);
 							int result = Tags.show(frame, nameGuest + " send file " + nameFileReceive + " for you",
@@ -378,17 +378,17 @@ public class ChatApp {
 									}
 								}
 							}).start();
-						} else if (msgObj.equals(Tags.FILE_REQ_NOACK_TAG)) {
+						} else if (msgObj.equals(Tags.FILE_REQ_NOACK_TAG)) { //cancel send file
 							Tags.show(frame, nameGuest + " wantn't receive file", false);
 							
 							
-						} else if (msgObj.equals(Tags.FILE_DATA_BEGIN_TAG)) {
+						} else if (msgObj.equals(Tags.FILE_DATA_BEGIN_TAG)) { //receiving file
 							finishReceive = false;
 							lblReceive.setVisible(true);
 							out = new FileOutputStream(URL_DIR + TEMP + nameFileReceive);
 							
 							
-						} else if (msgObj.equals(Tags.FILE_DATA_END_TAG)) {
+						} else if (msgObj.equals(Tags.FILE_DATA_END_TAG)) { // received file
 							updateChat(
 									"You receive file " + nameFileReceive 
 									+ " with total: " + sizeReceive + "KB");
@@ -437,7 +437,7 @@ public class ChatApp {
 			}
 		}
 
-		public void sendFile(String path) throws Exception {
+		public void sendFile(String path) throws Exception { // apply encrypt algorithms here!!
 			getData(path);
 			textState.setText("Sending ...");
 			do {
