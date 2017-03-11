@@ -20,23 +20,19 @@ public class algorithm {
 		//key to byte[]
 		Key key = KeyGenerator.getInstance("AES").generateKey();
 		byte[] encodedKey = key.getEncoded();
-		
 		FileOutputStream write = new FileOutputStream(new File("E:/key.txt"));
 		write.write(encodedKey);
+		write.close();
 		
-		FileInputStream r = new FileInputStream(new File("E:/key.txt"));
-		int read = 0;
-		int i = 0;
-		final int BUFFER_SIZE = 16 * 16;
-		byte[] buffer = new byte[BUFFER_SIZE];
-		byte[] key1;
-		while (r.read() != -1 ) {
-			
-		}
-	
+		
+		
+		
 		
 		//byte[] to key
-		byte[] decodedKey = encodedKey;
+		FileInputStream r = new FileInputStream(new File("E:/key.txt"));
+		int sizeFile = (int) r.getChannel().size();
+		byte[]  decodedKey = new byte[sizeFile];
+		r.read(decodedKey);
 		Key originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
 		if (key.equals(originalKey))
 			System.out.println("equal");

@@ -1,0 +1,21 @@
+package cryptography;
+
+import java.security.Key;
+
+import javax.crypto.spec.IvParameterSpec;
+
+public final class Convert {
+	private Convert(){};
+	
+	public static byte[] Key2Bytes(Key key){
+		return key.getEncoded();
+	}
+	
+	public static byte[] IV2Bytes(IvParameterSpec Iv){
+		return Iv.getIV();
+	}
+	
+	public static Key Bytes2Key(byte[] bytes, String algorithm){
+		Key originalKey = new SecretKeySpec(bytes, 0, bytes.length, algorithm); 
+	}
+}
