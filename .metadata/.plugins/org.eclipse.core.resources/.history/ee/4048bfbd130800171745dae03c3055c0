@@ -1,0 +1,33 @@
+package test;
+
+import java.awt.EventQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.network.client.ContractApp;
+
+public class testthread {
+
+	public static void main(String args[]) {
+		// String to be scanned to find the pattern.
+		String line = "This order was placed for QT3000000!OK?";
+		String pattern = "(.*)(\\d+)";
+
+		// Create a Pattern object
+		Pattern r = Pattern.compile(pattern);
+
+		// Now create matcher object.
+		Matcher m = r.matcher(line);
+		if (m.find()) {
+			System.out.println("Found value: " + m.group(0));
+			System.out.println("Found value: " + m.group(1));
+			System.out.println("Found value: " + m.group(2));
+			System.out.println("Found value: " + m.group(3));
+			System.out.println("Found value: " + m.group(4));
+			System.out.println("Found value: " + m.group(5));
+		} else {
+			System.out.println("NO MATCH");
+		}
+	}
+
+}

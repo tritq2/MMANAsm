@@ -13,7 +13,7 @@ public class RSA {
 	private KeyPairGenerator keypairgenerator;
 	private final String INSTANCE_CYPHER = "RSA/ECB/PKCS1Padding";
 	
-	RSA() throws NoSuchAlgorithmException, NoSuchPaddingException{
+	public RSA() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		keypairgenerator = KeyPairGenerator.getInstance("RSA");
 		rsaCipher = Cipher.getInstance(INSTANCE_CYPHER);
 	}

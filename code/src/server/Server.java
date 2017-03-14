@@ -7,10 +7,14 @@ package server;
 
 import com.networking.tags.DeCode;
 import com.networking.tags.enCode;
+
+import cryptography.Convert;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.Key;
 import java.util.ArrayList;
 
 import com.networking.data.DataPeer;
@@ -92,6 +96,7 @@ public class Server {
 					obOutputClient.flush();
 					obInputStream = new ObjectInputStream(connection.getInputStream());
 					message1 = (String) obInputStream.readObject();
+					ServerApp.updateMessage("message1: " + message1);
 					if (com.networking.tags.DeCode.signUp.matcher(message1).matches()) {
 						ArrayList<String> data = new ArrayList<String>();
 						data = DeCode.getSignUp(message1);
@@ -107,6 +112,12 @@ public class Server {
 					}
 					if (com.networking.tags.DeCode.logIn.matcher(message1).matches()) {
 						ArrayList<String> client_data = com.networking.tags.DeCode.getLogIn(message1);
+						ServerApp.updateMessage("before get key");
+						ServerApp.updateMessage("size client data : " + client_data.size());
+						ServerApp.updateMessage("client_data.get(3): " + client_data.get(3));
+						Key pubkey = Convert.String2Key(client_data.get(3), "RSA", true);
+						
+						ServerApp.updateMessage("server get public key success");
 						if (client_data == null) {
 
 						} else {
@@ -116,6 +127,8 @@ public class Server {
 										if (dataPeer.get(i).getName().equals(client_data.get(0))
 												&& dataPeer.get(i).getPass().equals(client_data.get(1))) {
 											username = dataPeer.get(i).getName();
+											pubkey = Convert.String2Key(client_data.get(3), "RSA", true);
+											ServerApp.updateMessage("server convert public key success");
 
 										}
 									}
@@ -131,6 +144,8 @@ public class Server {
 								obOutputClient.flush();
 								dataPeer.get(pos).setIsOnline(true);
 								dataPeer.get(pos).setIp(connection.getInetAddress().getHostAddress().toString());
+								dataPeer.get(pos).setPublicKey(pubkey);
+								ServerApp.updateMessage("server set public key success yo datapeer");
 								obOutputClient.writeObject(sendList());
 								obOutputClient.flush();
 							}
@@ -210,6 +225,9 @@ public class Server {
 				msg += Tags.PORT_OPEN_TAG;
 				msg += peer.getPort();
 				msg += Tags.PORT_END_TAG;
+				msg += Tags.PUBLIC_KEY_OPEN_TAG;
+				msg += Convert.Key2String(peer.getPublicKey());
+				msg += Tags.PUBLIC_KEY_CLOSE_TAG;
 				msg += Tags.PEER_CLOSE_TAG;
 			}
 		}
