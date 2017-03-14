@@ -92,7 +92,7 @@ public class enCode {
 				+ Tags.PORT_OPEN_TAG + Tags.SERVER_SENT_PORT_END_TAG;
 	}
 
-	public static String sendMessage(String message) {
+	public static String sendMessage(String message, String algorithm, String key, String iv) {
 		Matcher findMessage = checkMessage.matcher(message);
 		String result = "";
 		while (findMessage.find()) {
@@ -106,7 +106,13 @@ public class enCode {
 			findMessage = checkMessage.matcher(message);
 		}
 		result += message;
-		return Tags.MESSAGE_OPEN_TAG + result + Tags.MESSAGE_END_TAG; // tráº£
+		System.out.println("result message: " + result);
+		return  Tags.MESSAGE_OPEN_TAG 
+				+Tags.CRYPT_MESSAGE_OPEN_TAG  + result +  Tags.CRYPT_MESSAGE_CLOSE_TAG
+				+Tags.ALGORITHM_OPEN_TAG + "DES" + Tags.ALGORITHM_CLOSE_TAG
+				+Tags.KEY_OPEN_TAG + key + Tags.KEY_CLOSE_TAG
+				+Tags.IV_OPEN_TAG + iv + Tags.IV_CLOSE_TAG
+				+Tags.MESSAGE_END_TAG; // tráº£
 																		// vá»�
 																		// giao
 																		// thá»©c

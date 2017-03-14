@@ -25,6 +25,10 @@ import javax.crypto.spec.SecretKeySpec;
 public class algorithm {
 
 	public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+		
+		Convert.String2Key("z2Ä8E¶ñ‰", "DES", true);
+		//String k = new String(rsa.)
+		/*
 		RSA rsa = new RSA();
 		KeyPair kp = rsa.generateKey();
 		Key publickey  = kp.getPublic();
@@ -44,7 +48,7 @@ public class algorithm {
 		
 		
 		
-		
+		*/
 		//String key = "This is key!";
 		/*
 		String key_str = "1234567890123456";

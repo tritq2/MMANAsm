@@ -32,6 +32,15 @@ public final class Convert {
 		return new IvParameterSpec(bytes);
 	}
 	
+	public static String Iv2String(IvParameterSpec Iv){
+		return Base64.getEncoder().encodeToString(Iv.getIV());
+	}
+	
+	public static IvParameterSpec String2Iv(String str){
+		byte[] b_str = Base64.getDecoder().decode(str);
+		return new IvParameterSpec(b_str);
+	}
+	
 	public static String Key2String(Key key){
 		return  Base64.getEncoder().encodeToString(key.getEncoded());
 	}
@@ -53,6 +62,14 @@ public final class Convert {
 			PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
 			return privateKey;
 		}
+	}
+	
+	public static String Bytes2String(byte[] bytes){
+		return Base64.getEncoder().encodeToString(bytes);
+	}
+	
+	public static byte[] StringToBytes(String str){
+		return Base64.getDecoder().decode(str);
 	}
 	
 }

@@ -15,10 +15,10 @@ import cryptography.Convert;
 
 public class DeCode {
 
-	private static Pattern users = Pattern
-			.compile(Tags.SEND_REFRESH_OPEN_TAG + "(" + Tags.PEER_OPEN_TAG + Tags.PEER_NAME_OPEN_TAG + ".+"
-					+ Tags.PEER_NAME_END_TAG + Tags.IP_OPEN_TAG + ".+" + Tags.IP_END_TAG + Tags.PORT_OPEN_TAG + "[0-9]+"
-					+ Tags.PORT_END_TAG + Tags.PUBLIC_KEY_OPEN_TAG + ".*" + Tags.PUBLIC_KEY_CLOSE_TAG +Tags.PEER_CLOSE_TAG + ")*" + Tags.SEND_REFRESH_CLOSE_TAG);
+	private static Pattern users = Pattern.compile(Tags.SEND_REFRESH_OPEN_TAG + "(" + Tags.PEER_OPEN_TAG
+			+ Tags.PEER_NAME_OPEN_TAG + ".+" + Tags.PEER_NAME_END_TAG + Tags.IP_OPEN_TAG + ".+" + Tags.IP_END_TAG
+			+ Tags.PORT_OPEN_TAG + "[0-9]+" + Tags.PORT_END_TAG + Tags.PUBLIC_KEY_OPEN_TAG + ".*"
+			+ Tags.PUBLIC_KEY_CLOSE_TAG + Tags.PEER_CLOSE_TAG + ")*" + Tags.SEND_REFRESH_CLOSE_TAG);
 
 	public static Pattern signUp = Pattern.compile(Tags.SIGN_UP_OPEN_TAG + Tags.USER_NAME_OPEN_TAG + ".*"
 			+ Tags.USER_NAME_END_TAG + Tags.PASSWORD_OPEN_TAG + ".*" + Tags.PASSWORD_END_TAG + Tags.SIGN_UP_END_TAG);
@@ -92,21 +92,21 @@ public class DeCode {
 		return false;
 	}
 
-	public static Pattern logIn = Pattern.compile(
-			Tags.LOG_IN_OPEN_TAG + Tags.USER_NAME_OPEN_TAG + ".*" + Tags.USER_NAME_END_TAG + Tags.PASSWORD_OPEN_TAG
-					+ ".*" + Tags.PASSWORD_END_TAG + Tags.IP_OPEN_TAG + ".+" + Tags.IP_END_TAG + Tags.PUBLIC_KEY_OPEN_TAG + ".*" + Tags.PUBLIC_KEY_CLOSE_TAG  + Tags.LOG_IN_END_TAG);
+	public static Pattern logIn = Pattern.compile(Tags.LOG_IN_OPEN_TAG + Tags.USER_NAME_OPEN_TAG + ".*"
+			+ Tags.USER_NAME_END_TAG + Tags.PASSWORD_OPEN_TAG + ".*" + Tags.PASSWORD_END_TAG + Tags.IP_OPEN_TAG + ".+"
+			+ Tags.IP_END_TAG + Tags.PUBLIC_KEY_OPEN_TAG + ".*" + Tags.PUBLIC_KEY_CLOSE_TAG + Tags.LOG_IN_END_TAG);
 
 	public static ArrayList<String> getLogIn(String msg) { // Lay thong tin ten
 															// user , pass , ip
-														// khi dang nhap
-		
-		System.out.println("message in GetLoginfunction  in Decode file: " +msg);
+															// khi dang nhap
+
+		System.out.println("message in GetLoginfunction  in Decode file: " + msg);
 		ArrayList<String> user = new ArrayList<String>();
 		if (logIn.matcher(msg).matches()) {
 			Pattern findName = Pattern.compile(Tags.USER_NAME_OPEN_TAG + "[^<>]*" + Tags.USER_NAME_END_TAG);
 			Pattern findPass = Pattern.compile(Tags.PASSWORD_OPEN_TAG + "[^<>]*" + Tags.PASSWORD_END_TAG);
 			Pattern findIp = Pattern.compile(Tags.IP_OPEN_TAG + "[^<>]*" + Tags.IP_END_TAG);
-			Pattern findPublicKey = Pattern.compile(Tags.PUBLIC_KEY_OPEN_TAG + "[^<>]*" + Tags.PUBLIC_KEY_CLOSE_TAG);
+			Pattern findPublicKey = Pattern.compile(Tags.PUBLIC_KEY_OPEN_TAG + ".*" + Tags.PUBLIC_KEY_CLOSE_TAG);
 			Matcher find = findName.matcher(msg);
 			if (find.find()) {
 				String name = find.group(0);
@@ -126,6 +126,7 @@ public class DeCode {
 
 						find = findPublicKey.matcher(msg);
 						if (find.find()) {
+							System.out.println("match public key");
 							String publickey_str = find.group(0);
 							user.add(publickey_str.substring(Tags.PUBLIC_KEY_OPEN_TAG.length(),
 									publickey_str.length() - Tags.PUBLIC_KEY_CLOSE_TAG.length()));
@@ -253,14 +254,50 @@ public class DeCode {
 		return send_port;
 	}
 
-	private static Pattern message = Pattern.compile(Tags.MESSAGE_OPEN_TAG + ".*" + Tags.MESSAGE_END_TAG);
+	private static Pattern message = Pattern
+			.compile(Tags.MESSAGE_OPEN_TAG + Tags.CRYPT_MESSAGE_OPEN_TAG + ".*" + Tags.CRYPT_MESSAGE_CLOSE_TAG
+					+ Tags.ALGORITHM_OPEN_TAG + "[^<>]*" + Tags.ALGORITHM_CLOSE_TAG 
+					+ Tags.KEY_OPEN_TAG + ".*" + Tags.KEY_CLOSE_TAG
+					+ Tags.IV_OPEN_TAG + ".*" + Tags.IV_CLOSE_TAG
+					+ Tags.MESSAGE_END_TAG);
 
-	public static String getMessage(String msg) {
+	public static ArrayList<String> getMessage(String msg) {
+		ArrayList<String> params = new ArrayList<String>();
 		if (message.matcher(msg).matches()) {
-			int begin = Tags.MESSAGE_OPEN_TAG.length();
-			int end = msg.length() - Tags.MESSAGE_END_TAG.length();
-			String message = msg.substring(begin, end);
-			return message;
+			Pattern findCrypMessage = Pattern
+					.compile(Tags.CRYPT_MESSAGE_OPEN_TAG + ".*" + Tags.CRYPT_MESSAGE_CLOSE_TAG);
+			Pattern findAlgorithm = Pattern.compile(Tags.ALGORITHM_OPEN_TAG + "[^<>]*" + Tags.ALGORITHM_CLOSE_TAG);
+			Pattern findKey = Pattern.compile(Tags.KEY_OPEN_TAG + ".*" + Tags.KEY_CLOSE_TAG);
+			Pattern findIv = Pattern.compile(Tags.IV_OPEN_TAG + ".*" + Tags.IV_CLOSE_TAG);
+			String crypMessage;
+			String algorithm;
+			String key;
+			String iv;
+			Matcher find = findCrypMessage.matcher(msg);
+			if (find.find()) {
+				crypMessage = find.group(0).substring(Tags.CRYPT_MESSAGE_OPEN_TAG.length(),
+						find.group(0).length() - Tags.CRYPT_MESSAGE_CLOSE_TAG.length());
+				params.add(crypMessage);
+				find = findAlgorithm.matcher(msg);
+				if (find.find()) {
+					algorithm = find.group(0).substring(Tags.ALGORITHM_OPEN_TAG.length(),
+							find.group(0).length() - Tags.ALGORITHM_CLOSE_TAG.length());
+					params.add(algorithm);
+					find = findKey.matcher(msg);
+					if(find.find()){
+						key = find.group(0).substring(Tags.KEY_OPEN_TAG.length(),
+								find.group(0).length() - Tags.KEY_CLOSE_TAG.length());
+						params.add(key);
+						find = findIv.matcher(msg);
+						if(find.find()){
+							iv = find.group(0).substring(Tags.IV_OPEN_TAG.length(),
+									find.group(0).length() - Tags.IV_CLOSE_TAG.length());
+							params.add(iv);
+						}
+					}
+				}
+			}
+			return params;
 		}
 		return null;
 	}
@@ -358,18 +395,21 @@ public class DeCode {
 		return users;
 	}
 
-	public static ArrayList<DataPeer> getAllUser(String msg) throws NoSuchAlgorithmException, InvalidKeySpecException { // bo sung :))
+	public static ArrayList<DataPeer> getAllUser(String msg) throws NoSuchAlgorithmException, InvalidKeySpecException { // bo
+																														// sung
+																														// :))
 		ArrayList<DataPeer> user = new ArrayList<DataPeer>();
-		Pattern findPeer = Pattern.compile(Tags.PEER_OPEN_TAG + Tags.PEER_NAME_OPEN_TAG + "[^<>]*"
-				+ Tags.PEER_NAME_END_TAG + Tags.IP_OPEN_TAG + "[^<>]*" + Tags.IP_END_TAG + Tags.PORT_OPEN_TAG + "[0-9]*"
-				+ Tags.PORT_END_TAG + Tags.PUBLIC_KEY_OPEN_TAG + "[^<>]*" + Tags.PUBLIC_KEY_CLOSE_TAG + Tags.PEER_CLOSE_TAG);
+		Pattern findPeer = Pattern.compile(
+				Tags.PEER_OPEN_TAG + Tags.PEER_NAME_OPEN_TAG + "[^<>]*" + Tags.PEER_NAME_END_TAG + Tags.IP_OPEN_TAG
+						+ "[^<>]*" + Tags.IP_END_TAG + Tags.PORT_OPEN_TAG + "[0-9]*" + Tags.PORT_END_TAG
+						+ Tags.PUBLIC_KEY_OPEN_TAG + "[^<>]*" + Tags.PUBLIC_KEY_CLOSE_TAG + Tags.PEER_CLOSE_TAG);
 		Pattern findName = Pattern.compile(Tags.PEER_NAME_OPEN_TAG + ".*" + Tags.PEER_NAME_END_TAG);
 		Pattern findPort = Pattern.compile(Tags.PORT_OPEN_TAG + "[0-9]*" + Tags.PORT_END_TAG);
 		Pattern findIP = Pattern.compile(Tags.IP_OPEN_TAG + ".+" + Tags.IP_END_TAG);
 		Pattern findPublicKey = Pattern.compile(Tags.PUBLIC_KEY_OPEN_TAG + "[^<>]*" + Tags.PUBLIC_KEY_CLOSE_TAG);
 		System.out.println("before get all user");
 		if (users.matcher(msg).matches()) {
-			System.out.println("if stat get all user");	
+			System.out.println("if stat get all user");
 			Matcher find = findPeer.matcher(msg);
 			while (find.find()) {
 				String peer = find.group(0);
@@ -393,11 +433,12 @@ public class DeCode {
 				findInfo = findPublicKey.matcher(peer);
 				if (findInfo.find()) {
 					data = findInfo.group(0);
-					
-					String key_Str = data.substring(Tags.PUBLIC_KEY_OPEN_TAG.length(), data.length() - Tags.PUBLIC_KEY_CLOSE_TAG.length());
-					
+
+					String key_Str = data.substring(Tags.PUBLIC_KEY_OPEN_TAG.length(),
+							data.length() - Tags.PUBLIC_KEY_CLOSE_TAG.length());
+
 					dataPeer.setPublicKey(Convert.String2Key(key_Str, "RSA", true));
-				} 
+				}
 				user.add(dataPeer);
 			}
 		} else {

@@ -127,7 +127,7 @@ public class Server {
 										if (dataPeer.get(i).getName().equals(client_data.get(0))
 												&& dataPeer.get(i).getPass().equals(client_data.get(1))) {
 											username = dataPeer.get(i).getName();
-											pubkey = Convert.String2Key(client_data.get(3), "RSA", true);
+											//pubkey = Convert.String2Key(client_data.get(3), "RSA", true);
 											ServerApp.updateMessage("server convert public key success");
 
 										}

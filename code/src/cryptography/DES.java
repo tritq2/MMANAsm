@@ -19,7 +19,7 @@ public class DES {
 	private IvParameterSpec iv ;
 	private final String INSTANCE_CYPHER = "DES/CBC/PKCS5Padding";
 	 
-	DES() throws NoSuchAlgorithmException, NoSuchPaddingException{
+	public DES() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		keygenerator = KeyGenerator.getInstance("DES");
 		desCipher = Cipher.getInstance(INSTANCE_CYPHER);
 	}

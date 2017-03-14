@@ -94,6 +94,16 @@ public class Tags {
 	
 	public static String PUBLIC_KEY_OPEN_TAG = "<PUBLIC_KEY>";
 	public static String PUBLIC_KEY_CLOSE_TAG = "</PUBLIC_KEY>";
+	public static String CRYPT_MESSAGE_OPEN_TAG = "<CRYPT_MESSAGE>";
+	public static String CRYPT_MESSAGE_CLOSE_TAG = "</CRYPT_MESSAGE>";
+	public static String ALGORITHM_OPEN_TAG = "<ALGORITHM>";
+	public static String ALGORITHM_CLOSE_TAG = "</ALGORITHM>";
+	public static String KEY_OPEN_TAG = "<KEY>";
+	public static String KEY_CLOSE_TAG = "</KEY>";
+	public static String IV_OPEN_TAG = "<IV>";
+	public static String IV_CLOSE_TAG = "</IV>";
+	
+	
 	
 
 	private static int equalData(String msg) {
@@ -213,6 +223,23 @@ public class Tags {
 			return 56;
 		if (msg.equals(PUBLIC_KEY_CLOSE_TAG))
 			return 57;
+		if (msg.equals(CRYPT_MESSAGE_OPEN_TAG))
+			return 58;
+		if (msg.equals(CRYPT_MESSAGE_CLOSE_TAG))
+			return 59;
+		if (msg.equals(ALGORITHM_OPEN_TAG))
+			return 60;
+		if (msg.equals(ALGORITHM_CLOSE_TAG))
+			return 61;
+		if (msg.equals(KEY_OPEN_TAG))
+			return 62;
+		if (msg.equals(KEY_CLOSE_TAG))
+			return 63;
+		if (msg.equals(IV_OPEN_TAG))
+			return 64;
+		if (msg.equals(IV_CLOSE_TAG))
+			return 65;
+		
 		return IN_VALID; // other case!
 	}
 
