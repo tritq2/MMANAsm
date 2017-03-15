@@ -2,6 +2,11 @@ package com.network.client;
 
 import java.awt.EventQueue;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -14,6 +19,10 @@ import javax.swing.JButton;
 import com.networking.data.DataFile;
 import com.networking.tags.DeCode;
 import com.networking.tags.enCode;
+
+import cryptography.Convert;
+import cryptography.DES;
+
 import com.networking.tags.Tags;
 
 import java.awt.event.ActionListener;
@@ -25,6 +34,7 @@ import java.awt.TextArea;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +42,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
 import javax.swing.JProgressBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -224,8 +242,72 @@ public class ChatApp {
 				
 				if (result == JFileChooser.APPROVE_OPTION) {
 					String pathSaveEncryptFile = fileChooser.getSelectedFile().getAbsolutePath();
+					String key_str = "12345678";
+					DES des = null;
+					try {
+						des = new DES();
+					} catch (NoSuchAlgorithmException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchPaddingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					Key key = Convert.Bytes2Key(key_str.getBytes(), "DES");
+
+					//read file to bytes - > InputFiledata
+					Path pathObj = Paths.get(path);
+					byte[] InputFiledata = null;
+					try {
+						InputFiledata = Files.readAllBytes(pathObj);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					//get output file name:
+					String encryptFileName = pathSaveEncryptFile+'\\' + pathObj.getFileName().toString() + ".encrypted";
+					// create new file to flush encrypted bytes data
+					File encryptedFile = new File(encryptFileName);
+					FileOutputStream outputStream = null;
+					try {
+						outputStream = new FileOutputStream(encryptedFile);
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+					// get data encypted
+					byte[] outputBytes = null;
+					try {
+						outputBytes = des.encrypt(InputFiledata, key);
+					} catch (InvalidKeyException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (NoSuchAlgorithmException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (NoSuchPaddingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IllegalBlockSizeException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (BadPaddingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					// write output file
+					try {
+						outputStream.write(outputBytes);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					
-					System.console().printf(pathSaveEncryptFile);
+					// System.console().printf(pathSaveEncryptFile);
 					return;
 				}
 			}

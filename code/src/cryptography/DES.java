@@ -19,7 +19,7 @@ public class DES {
 	private IvParameterSpec iv ;
 	private final String INSTANCE_CYPHER = "DES/CBC/PKCS5Padding";
 	 
-	DES() throws NoSuchAlgorithmException, NoSuchPaddingException{
+	public DES() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		keygenerator = KeyGenerator.getInstance("DES");
 		desCipher = Cipher.getInstance(INSTANCE_CYPHER);
 	}
@@ -60,11 +60,15 @@ public class DES {
 		*/
 		
 		DES des = new DES();
-		Key key = des.generateKey();
+		String key_str = "12345678";
+		Key key = Convert.Bytes2Key(key_str.getBytes(), "DES");
+		//Key key = des.generateKey();
 		String plaintext = "I'm vuthede";
 		byte[] key_byte = Convert.Key2Bytes(key);
 		byte[] cbyte = des.encrypt(plaintext.getBytes(), key);
 		IvParameterSpec iv = des.getIv();
+		
+		
 		
 		String ctext = new String(des.decrypt(cbyte, Convert.Bytes2Key(key_byte, "DES"),iv));
 		System.out.println(ctext);
