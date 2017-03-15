@@ -30,6 +30,8 @@ public class Peer {
 	public Peer(String arg, int arg1, String name, String dataUser)
     			throws Exception {
 		ipServer = InetAddress.getByName(arg);
+		System.out.println("This is arg of client: " + arg);
+		
 		nameUser = name;
 		portPeer = arg1;
                 
@@ -57,6 +59,8 @@ public class Peer {
 		serverInputStream = new ObjectInputStream(socketClient.getInputStream());
 		msg = (String) serverInputStream.readObject();
 		serverInputStream.close();
+		System.out.println("This is request in Peer: " );
+		
 		peer = DeCode.getAllUser(msg);
 		new Thread(new Runnable() {
 

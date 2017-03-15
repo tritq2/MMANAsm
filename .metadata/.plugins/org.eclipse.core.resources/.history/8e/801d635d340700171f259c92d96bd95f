@@ -1,0 +1,66 @@
+package cryptography;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
+
+public class algorithm {
+
+	public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException {
+		//String key = "This is key!";
+		
+		String key_str = "12345";
+		String ptext  = "vuthede";
+		
+		DES des = new DES();
+		
+		des.encrypt(p.getBytes(), key);
+		
+	/*	
+		//key to byte[]
+		Key key = KeyGenerator.getInstance("AES").generateKey();
+		byte[] encodedKey = key.getEncoded();
+		FileOutputStream write = new FileOutputStream(new File("E:/key.txt"));
+		write.write(encodedKey);
+		write.close();
+		
+		
+		
+		
+		
+		//byte[] to key
+		FileInputStream r = new FileInputStream(new File("E:/key.txt"));
+		int sizeFile = (int) r.getChannel().size();
+		byte[]  decodedKey = new byte[sizeFile];
+		r.read(decodedKey);
+		Key originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
+		if (key.equals(originalKey))
+			System.out.println("equal");
+		*/
+		
+		//Read and Write any file into byte and vice versa
+		/*
+		final int BUFFER_SIZE = 1024 * 1024; // this is actually bytes
+		FileInputStream fis = new FileInputStream(new File("E:/a.wmv"));
+		byte[] buffer = new byte[BUFFER_SIZE];
+		int read = 0;
+		int i= 0;
+		FileOutputStream fos = new FileOutputStream("E:/b.wmv");
+		while ((read = fis.read(buffer)) > 0) {
+			i++;
+			System.out.println("chunk i-th: " + i );
+			fos.write(buffer);
+		}
+		fis.close();
+		fos.close();
+		*/
+	}
+}

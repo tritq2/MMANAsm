@@ -15,11 +15,14 @@ import javax.swing.JButton;
 
 import com.networking.tags.Tags;
 
+import cryptography.RSA;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyPair;
 import java.util.ArrayList;
 
 public class ContractApp {
@@ -39,6 +42,7 @@ public class ContractApp {
     private ObjectInputStream input;
     private ObjectOutputStream output;
     public static ArrayList<DataPeer> peer_data = null;
+   
     
     
     public void start(final String ip) {
@@ -61,12 +65,13 @@ public class ContractApp {
     public ContractApp(String arg, int arg1, String name, String msg,final String IPSer, SecretKey key)
             throws Exception {
         IPClient = arg;
+        System.out.println("This sis arg of client in ContractApp: " + arg);
         portClient = arg1;
         nameUser = name;
         dataUser = msg;
         keyToEnCode = key;
         set_IPServer(IPSer);
-        
+      
         
         com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme("Green",
                 "INSERT YOUR LICENSE KEY HERE", "my company");
@@ -194,10 +199,7 @@ public class ContractApp {
             public void actionPerformed(ActionEvent arg0) {
                 //code here
                 try {
-                	
-                	
-                	
-                	
+                	    	
                     socketClient = new Socket(IPserver, 8080);// IPserver
                     output = new ObjectOutputStream(socketClient.getOutputStream());
                     output.flush();
@@ -205,9 +207,13 @@ public class ContractApp {
                     
                     output.writeObject(com.networking.tags.Tags.REFRESH);
                     output.flush();
+                    System.out.println("send refresh request success!");
                     String ref_msg=(String)input.readObject();
+                    System.out.println("receive refresh data success: " + ref_msg);
                     peer_data = new ArrayList<DataPeer>();
                     peer_data = com.networking.tags.DeCode.getAllUser(ref_msg);
+                    
+                    System.out.println("peer_data size: "+ peer_data.size());
                     
                     
                    

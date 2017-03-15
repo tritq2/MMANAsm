@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JButton;
@@ -20,6 +21,8 @@ import javax.swing.UIManager;
 //import com.networking.client.ContractApp; // chua xai toi
 import com.networking.tags.enCode;
 
+import cryptography.Convert;
+import cryptography.RSA;
 import server.Server;
 
 import com.networking.tags.Tags;
@@ -34,6 +37,9 @@ import java.awt.Font;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+
 import javax.swing.JOptionPane;
 
 public class Login {
@@ -55,6 +61,8 @@ public class Login {
     private String password;
     private Socket socketClient;
     private ContractApp contract;
+    public static RSA rsa ;
+    public static KeyPair keyRSA;
     //private Signup sun;
 
     public void start(final String ip) {
@@ -80,8 +88,10 @@ public class Login {
     public String get_IP(){
     	return IP;
     }
-    public Login(String ip) {
+    public Login(String ip) throws NoSuchAlgorithmException, NoSuchPaddingException {
         IP = ip;
+        rsa = new RSA();
+        keyRSA = rsa.generateKey();
         initialize();
     }
 
@@ -119,29 +129,35 @@ public class Login {
                     try {
                         //Socket socketClient=Connect.getSocket();
                         socketClient = new Socket(IP, 8080);
-                        String msg = enCode.logIN(name, pass, InetAddress.getLocalHost().toString());
+                        
+                        String pubkey =  Convert.Key2String(Login.keyRSA.getPublic());
+                        String msg = enCode.logIN(name, pass, InetAddress.getLocalHost().toString(), pubkey);
                         
                         ObjectOutputStream serverOutputStream = new ObjectOutputStream(
                                 socketClient.getOutputStream());
                         serverOutputStream.writeObject(msg);
                         serverOutputStream.flush();
-                        
+                        System.out.println("Login send message to server " );
                         ObjectInputStream serverInputStream = new ObjectInputStream(
                                 socketClient.getInputStream());
+                        System.out.println("Get message fromm server success" );
                         msg = (String) serverInputStream.readObject();
+                        System.out.println("Login success or fail " );
                         if (msg.matches(Tags.LOG_IN_RES_FAIL)) {
                             JOptionPane.showMessageDialog(frmLogin, " sign in is unsuccessful");
+                            System.out.println("login fail!" );
                         } else {
                             JOptionPane.showMessageDialog(frmLogin, " sign in is successful");
                             String port = DeCode.portOnl(msg);
                             String msg1 = (String) serverInputStream.readObject();
-                            
+
+                            System.out.println("ms1 in Login: " + msg1);
                             byte[] decodedKey = Base64.getDecoder().decode(pass);
                             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
-
                             socketClient.close();
                             serverInputStream.close();
                             serverOutputStream.close();
+                            System.out.println("host address: " + InetAddress.getLocalHost().getHostAddress());
                             contract = new ContractApp(InetAddress.getLocalHost().getHostAddress()
                                     , Integer.parseInt(port), name, msg1, get_IP(),originalKey);
                             frmLogin.dispose();

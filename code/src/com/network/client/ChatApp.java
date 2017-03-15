@@ -1,7 +1,7 @@
 package com.network.client;
 
 import java.awt.EventQueue;
-
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -17,9 +17,11 @@ import javax.swing.UIManager;
 import javax.swing.JButton;
 
 import com.networking.data.DataFile;
+import com.networking.login.Login;
 import com.networking.tags.DeCode;
 import com.networking.tags.enCode;
 
+import cryptography.AES;
 import cryptography.Convert;
 import cryptography.DES;
 
@@ -42,6 +44,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+
+import java.security.Key;
+import java.util.ArrayList;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,6 +67,7 @@ public class ChatApp {
 	private ChatRoom chat;
 	private Socket socketChat;
 	private String nameUser = "", nameGuest = "", nameFile = "";
+	Key guessKey;
 	private JFrame frame;
 	private JTextField textName;
 	private JPanel panelMessage;
@@ -74,6 +80,9 @@ public class ChatApp {
 	private int portServer = 0;
 	private JTextField textSend;
 	private JPanel panelFile;
+	public DES des;
+	public AES aes;
+	
 
 	public ChatApp(String user, String guest, Socket socket, int port) {
 		nameUser = user;
@@ -130,6 +139,22 @@ public class ChatApp {
 		nameGuest = guest;
 		socketChat = socket;
 		this.portServer = port;
+		des = new DES();
+		aes = new AES();
+		
+		//Get publickey of guess
+		System .out.println("size of peer in file Chatapp: " + Peer.peer.size() );
+		System.out.println("namequest: " + nameGuest);
+		for (int i = 0; i< Peer.peer.size() ; i++){
+			System.out.println("name loop: "+ Peer.peer.get(i).getName());
+			if(Peer.peer.get(i).getName().equals(nameGuest)){
+				System.out.println("found namequest: " + nameGuest);
+				guessKey = Peer.peer.get(i).getPublicKey();
+				if (guessKey != null)
+					System.out.println("guesskey # null");
+				break;
+			}
+		}
 		initialize();
 		chat = new ChatRoom(socketChat, nameUser, nameGuest);
 		chat.start();
@@ -346,7 +371,17 @@ public class ChatApp {
 					return;
 				}
 				try {
-					chat.sendMessage(enCode.sendMessage(msg));
+					String algorithm = "DES";
+					Key key = des.generateKey();
+					String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(),key ));
+					IvParameterSpec iv = des.getIv();
+					System.out.println("File ChatApp. Before encrypt key");
+					if (guessKey == null)
+						System.out.println("guesskey = null");
+					String encryptedkey = Convert.Bytes2String(Login.rsa.encrypt(Convert.Key2Bytes(key), guessKey));
+					System.out.println("File ChatApp. After encryptkey");
+					chat.sendMessage(enCode.sendMessage(msg_cipher, algorithm, encryptedkey, Convert.Iv2String(iv)));
+					System.out.println("File ChatApp. After send mm");
 					updateChat("[ME]	:" + msg);
 					textSend.setText("");
 				} catch (Exception e) {
@@ -382,7 +417,16 @@ public class ChatApp {
 						return;
 					}
 					try {
-						chat.sendMessage(enCode.sendMessage(msg));
+						String algorithm = "DES";
+						Key key = des.generateKey();
+						String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(),key ));
+						IvParameterSpec iv = des.getIv();
+						System.out.println("File ChatApp. Before encrypt key");
+						if (guessKey == null)
+							System.out.println("guesskey = null");
+						String encryptedkey = Convert.Bytes2String(Login.rsa.encrypt(Convert.Key2Bytes(key), guessKey));
+						System.out.println("File ChatApp. After encryptkey");
+						chat.sendMessage(enCode.sendMessage(msg_cipher, algorithm, encryptedkey, Convert.Iv2String(iv)));
 						updateChat("[ME]	:" + msg);
 						textSend.setText("");
 						textSend.setCaretPosition(0);
@@ -442,11 +486,13 @@ public class ChatApp {
 		private String nameFileReceive = "";
 		private InputStream inFileSend;
 		private DataFile dataFile;
+		
 
 		public ChatRoom(Socket connection, String name, String guest) throws Exception {
 			connect = new Socket();
 			connect = connection;
 			nameGuest = guest;
+			
 		}
 
 		@Override
@@ -527,8 +573,27 @@ public class ChatApp {
 							finishReceive = true;
 						}
 						else {
-							String message = DeCode.getMessage(msgObj);
-							updateChat("[" + nameGuest + "]	:" + message);
+							ArrayList<String> message = DeCode.getMessage(msgObj);
+							System.out.println("receive raw mesage: " + msgObj);
+							if (message ==null)
+								System.out.println("massage is null!!!");
+							String ctext = message.get(0);
+							System.out.println("ctext: " + ctext);
+							String algorithm = message.get(1);
+							System.out.println("algo: " + algorithm);
+							System.out.println("size message array: " + message.size());
+							System.out.println("message.get(2): " + message.get(2));
+							String encryptedkey = message.get(2);
+							System.out.println("encryptedKey: " + encryptedkey);
+							String key = Convert.Bytes2String(Login.rsa.decrypt(Convert.StringToBytes(encryptedkey), 
+													Login.keyRSA.getPrivate()));
+							System.out.println("key: " + key);
+							String iv = message.get(3);
+							System.out.println("iv: " + iv);
+							String ptext = new String(des.decrypt(Convert.StringToBytes(ctext), 
+									Convert.String2Key(key, "DES", true), Convert.String2Iv(iv)));
+							System.out.println("ptext: " + ptext);
+							updateChat("[" + nameGuest + "]	:" + ptext);
 						}
 					} else if (obj instanceof DataFile) {
 						DataFile data = (DataFile) obj;

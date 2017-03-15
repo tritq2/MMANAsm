@@ -5,6 +5,8 @@
  */
 package com.networking.data;
 
+import java.security.Key;
+
 /**
  *
  * @author Dell
@@ -14,29 +16,39 @@ public class DataPeer {
 	private String passPeer = "";
 	private int port = -1;
 	private boolean isOnline = false;
-        private String ipaddress = "";
+	private String ipaddress = "";
+	private Key publicKey;
+	
+	public Key getPublicKey() {
+		return publicKey;
+	}
 
-        public boolean get_isOnl(){
-            return isOnline;
-        }
-    
-        
-        public void setPeer(String name, String pass,int peerPort) {
+	public void setPublicKey(Key publicKey) {
+		this.publicKey = publicKey;
+	}
+
+	public boolean get_isOnl() {
+		return isOnline;
+	}
+
+	public void setPeer(String name, String pass, int peerPort) {
 		namePeer = name;
 		passPeer = pass;
 		port = peerPort;
 	}
-	
-        public void setIp(String ip){
-            ipaddress = ip;
-        }
-        public String getIp(){
-            return ipaddress;
-        }
+
+	public void setIp(String ip) {
+		ipaddress = ip;
+	}
+
+	public String getIp() {
+		return ipaddress;
+	}
+
 	public void setName(String name) {
 		namePeer = name;
 	}
-	
+
 	public void setPass(String pass) {
 		passPeer = pass;
 	}
@@ -44,17 +56,18 @@ public class DataPeer {
 	public void setPort(int peerPort) {
 		port = peerPort;
 	}
-        public void setIsOnline(boolean isOnl){
-            isOnline = isOnl;
-        }
-/*	public void setPort(int port) {
-		portPeer = port;
-	}*/
+
+	public void setIsOnline(boolean isOnl) {
+		isOnline = isOnl;
+	}
+	/*
+	 * public void setPort(int port) { portPeer = port; }
+	 */
 
 	public String getName() {
 		return namePeer;
 	}
-	
+
 	public String getPass() {
 		return passPeer;
 	}
@@ -62,11 +75,12 @@ public class DataPeer {
 	public int getPort() {
 		return port;
 	}
-        public boolean getIsOnline(){
-            return isOnline;
-        }
-	/*public int getPort() {
-		return portPeer;
-	}*/
-    
+
+	public boolean getIsOnline() {
+		return isOnline;
+	}
+	/*
+	 * public int getPort() { return portPeer; }
+	 */
+
 }

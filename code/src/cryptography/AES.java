@@ -18,7 +18,7 @@ public class AES {
 	private IvParameterSpec iv ;
 	private final String INSTANCE_CYPHER = "AES/CBC/PKCS5Padding";
 
-	AES() throws NoSuchAlgorithmException, NoSuchPaddingException{
+	public AES() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		keygenerator = KeyGenerator.getInstance("AES");
 		aesCipher = Cipher.getInstance(INSTANCE_CYPHER);
 		

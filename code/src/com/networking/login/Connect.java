@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.JButton;
 import javax.swing.UIManager;
 
@@ -23,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 import java.awt.Font;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -142,7 +144,13 @@ public class Connect {
                             a.start(IP);
                             frmConnect.dispose();
                         } catch (IOException ex) {
-                        }
+                        } catch (NoSuchAlgorithmException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchPaddingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
                         socket.close();
                         input.close();
                         output.close();
