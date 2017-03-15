@@ -23,6 +23,6 @@
 <fullyQualifiedTypeName name="cryptography.AES"/>
 <fullyQualifiedTypeName name="javax.crypto.spec.IvParameterSpec"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
-<fullyQualifiedTypeName name="cryptography.Convert"/>
 <fullyQualifiedTypeName name="com.networking.login.Login"/>
+<fullyQualifiedTypeName name="cryptography.Convert"/>
 </qualifiedTypeNameHistroy>

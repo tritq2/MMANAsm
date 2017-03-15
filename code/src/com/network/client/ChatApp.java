@@ -302,7 +302,7 @@ public class ChatApp {
 					try {
 						String algorithm = "DES";
 						Key key = des.generateKey();
-						String msg_cipher = new String(des.encrypt(msg.getBytes(),key ));
+						String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(),key ));
 						IvParameterSpec iv = des.getIv();
 						System.out.println("File ChatApp. Before encrypt key");
 						if (guessKey == null)
