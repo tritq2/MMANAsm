@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 public class Tags {
 	public static int IN_VALID = -1;
 
-	public static int MAX_MSG_SIZE = 1024;
+	public static int MAX_MSG_SIZE = 1024 *1024;
 
 	public static String SIGN_UP_OPEN_TAG = "<SIGN_UP>"; // 1
 	public static String SIGN_UP_END_TAG = "</SIGN_UP>"; // 2
@@ -102,6 +102,7 @@ public class Tags {
 	public static String KEY_CLOSE_TAG = "</KEY>";
 	public static String IV_OPEN_TAG = "<IV>";
 	public static String IV_CLOSE_TAG = "</IV>";
+	
 	
 	
 	

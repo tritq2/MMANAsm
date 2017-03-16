@@ -82,7 +82,8 @@ public class ChatApp {
 	private JPanel panelFile;
 	public DES des;
 	public AES aes;
-	
+	public Key keyForDecryptReceiveFile;
+	public IvParameterSpec ivForDecrytReceiveFile;
 
 	public ChatApp(String user, String guest, Socket socket, int port) {
 		nameUser = user;
@@ -597,8 +598,17 @@ public class ChatApp {
 						}
 					} else if (obj instanceof DataFile) {
 						DataFile data = (DataFile) obj;
+						byte[] encrypedmsg = data.data;
+						String key_str_encrypt = data.encryptedkey;
+						String iv_str = data.iv;
+						String key_str_decrypted = Convert.Bytes2String(Login.rsa.decrypt(Convert.StringToBytes(key_str_encrypt), 
+								Login.keyRSA.getPrivate()));
+						
+						byte[] decryptmsg = aes.decrypt(encrypedmsg, 
+								Convert.String2Key(key_str_decrypted, "AES", true), Convert.String2Iv(iv_str));
+						
 						++sizeReceive;
-						out.write(data.data);
+						out.write(decryptmsg);
 					}
 				} catch (Exception e) {
 					File fileTemp = new File(URL_DIR + TEMP + nameFileReceive);
@@ -612,15 +622,21 @@ public class ChatApp {
 		private void getData(String path) throws Exception {
 			File fileData = new File(path);
 			if (fileData.exists()) {
+				
 				sizeOfSend = 0;
-				dataFile = new DataFile();
 				sizeFile = (int) fileData.length();
-				sizeOfData = sizeFile % 1024 == 0 ? (int) (fileData.length() / 1024)
-						: (int) (fileData.length() / 1024) + 1;
+				sizeOfData = sizeFile % (1024 *1024) == 0 ? (int) (fileData.length() / (1024 *1024))
+						: (int) (fileData.length() / (1024 *1024)) + 1;
+				System.out.println("size of data: " + sizeOfData);
 				textState.setVisible(true);
 				progressSendFile.setVisible(true);
 				progressSendFile.setValue(0);
+				System.out.println("path file: " + path);
 				inFileSend = new FileInputStream(fileData);
+				if (sizeFile < Tags.MAX_MSG_SIZE)
+					dataFile = new DataFile(sizeFile);
+				else 
+					dataFile = new DataFile();
 			}
 		}
 
@@ -630,19 +646,42 @@ public class ChatApp {
 			do {
 				if (continueSendFile) {
 					continueSendFile = false;
-					new Thread(new Runnable() {
+					//new Thread(new Runnable() {
 
-						@Override
-						public void run() {
+					//	@Override
+					//	public void run() {
 							try {
-								inFileSend.read(dataFile.data);
-								sendMessage(dataFile);
+								System.out.println("before read byte to dataFile");
+								int sobyte = inFileSend.read(dataFile.data);
+								System.out.println("after read byte to data file: " + dataFile.data.length);
+								System.out.println("so byte:" + sobyte);
+								String algorithm = "AES";
+								
+								Key key = aes.generateKey();
+								System.out.println("generatekey success");
+								byte[] msg_cipher = aes.encrypt(dataFile.data, key);
+								System.out.println("encrypt sucess");
+								IvParameterSpec iv = aes.getIv();
+								System.out.println("get ic success");
+								String encryptedkey = Convert.Bytes2String(Login.rsa.encrypt(Convert.Key2Bytes(key), guessKey));
+								System.out.println("convert and encrypt ey success");
+								DataFile encrypted_datafile = new DataFile(msg_cipher, encryptedkey, Convert.Iv2String(iv));
+								System.out.println("new data file success");
+								sendMessage(encrypted_datafile);
+								System.out.println("send message success");
 								sizeOfSend++;
+								System.out.println("size of Send: " + sizeOfSend);
+								
+								if (sizeOfSend == 1 && sizeOfSend < sizeOfData -1)
+									dataFile = new DataFile();
+									
 								if (sizeOfSend == sizeOfData - 1) {
-									int size = sizeFile - sizeOfSend * 1024;
+									int size = sizeFile - sizeOfSend * 1024 *1024 ;
 									dataFile = new DataFile(size);
 								}
+								System.out.println("truoc khi thanhg trnag thai");
 								progressSendFile.setValue((int) (sizeOfSend * 100 / sizeOfData));
+								System.out.println("sau khi thanhg trnag thai");
 								if (sizeOfSend >= sizeOfData) {
 									inFileSend.close();
 									isSendFile = true;
@@ -660,12 +699,14 @@ public class ChatApp {
 									inFileSend.close();
 								}
 								continueSendFile = true;
+								System.out.println("Chuan bi lap tiep");
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
 						}
-					}).start();
-				}
+				//	}).start();
+			
+				
 			} while (sizeOfSend < sizeOfData);
 		}
 

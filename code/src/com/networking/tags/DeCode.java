@@ -475,4 +475,37 @@ public class DeCode {
 	}
 
 	private static Pattern feedBack = Pattern.compile(Tags.FILE_REQ_ACK_OPEN_TAG + ".*" + Tags.FILE_REQ_ACK_CLOSE_TAG);
+	
+	/*
+	public static String ReceiveKey(String msg){
+		Pattern findKey =Pattern.compile(Tags.KEY_OPEN_TAG + ".*" + Tags.KEY_CLOSE_TAG);
+		String key = "";
+		if (receivekey_msg.matcher(msg).matches()){
+			Matcher find = findKey.matcher(msg);
+			if (find.find()){
+				key = find.group(0).substring(Tags.KEY_OPEN_TAG.length(), find.group(0).length() - Tags.KEY_CLOSE_TAG.length());
+			}
+			return key;
+		}
+		return null;
+	}
+	
+	private static Pattern receivekey_msg = Pattern.compile(Tags.KEY_OPEN_TAG + ".*" + Tags.KEY_CLOSE_TAG);
+	
+	public static String ReceiveIv(String msg){
+		Pattern findIv =Pattern.compile(Tags.IV_OPEN_TAG + ".*" + Tags.IV_CLOSE_TAG);
+		String Iv = "";
+		if (receiveIv_msg.matcher(msg).matches()){
+			Matcher find = findIv.matcher(msg);
+			if (find.find()){
+				Iv = find.group(0).substring(Tags.IV_OPEN_TAG.length(), find.group(0).length() - Tags.IV_CLOSE_TAG.length());
+			}
+			return Iv;
+		}
+		return null;
+	}
+	
+	private static Pattern receiveIv_msg = Pattern.compile(Tags.IV_OPEN_TAG + ".*" + Tags.IV_CLOSE_TAG);
+	*/
+	
 }
