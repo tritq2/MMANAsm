@@ -5,17 +5,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.DigestInputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Base64;
 
 import javax.crypto.*;
@@ -25,8 +31,28 @@ import javax.crypto.spec.SecretKeySpec;
 public class algorithm {
 
 	public static void main(String[] args) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException {
+		//System.out.println(MD5.getchecksumOfFile("E:/ptext.txt"));
 		
-		Convert.String2Key("z2Ä8E¶ñ‰", "DES", true);
+		/*
+		AES aes = new AES();
+		Key key = aes.generateKey();
+		ArrayList<String> ps = new ArrayList<String>();
+		for (int i = 0 ; i < 100; i++){
+			ps.add(Integer.toString(i));
+		}
+		
+		int count = 0;
+		for (int  i = 0 ; i < 100; i++){
+			byte[]  c_b = aes.encrypt(ps.get(i).getBytes(), key);
+			IvParameterSpec iv = aes.getIv();
+			System.out.println("iv: " + Convert.Iv2String(iv));
+			System.out.println(new String (aes.decrypt(c_b, key, iv)));
+		}
+		*/
+		
+		
+		
+		
 		//String k = new String(rsa.)
 		/*
 		RSA rsa = new RSA();
@@ -94,13 +120,13 @@ public class algorithm {
 		*/
 		
 		//Read and Write any file into byte and vice versa
-		/*
+		
 		final int BUFFER_SIZE = 1024 * 1024; // this is actually bytes
-		FileInputStream fis = new FileInputStream(new File("E:/a.wmv"));
+		FileInputStream fis = new FileInputStream(new File("E:\\a.wmv"));
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int read = 0;
 		int i= 0;
-		FileOutputStream fos = new FileOutputStream("E:/b.wmv");
+		FileOutputStream fos = new FileOutputStream("E:\\b.wmv");
 		while ((read = fis.read(buffer)) > 0) {
 			i++;
 			System.out.println("chunk i-th: " + i );
@@ -108,6 +134,6 @@ public class algorithm {
 		}
 		fis.close();
 		fos.close();
-		*/
+		
 	}
 }

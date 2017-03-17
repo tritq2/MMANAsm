@@ -102,6 +102,8 @@ public class Tags {
 	public static String KEY_CLOSE_TAG = "</KEY>";
 	public static String IV_OPEN_TAG = "<IV>";
 	public static String IV_CLOSE_TAG = "</IV>";
+	public static String CHECKSUM_OPEN_TAG = "<CHECKSUM>";
+	public static String CHECKSUM_CLOSE_TAG = "/CHECKSUM";
 	
 	
 	
@@ -240,6 +242,10 @@ public class Tags {
 			return 64;
 		if (msg.equals(IV_CLOSE_TAG))
 			return 65;
+		if (msg.equals(CHECKSUM_OPEN_TAG))
+			return 66;
+		if (msg.equals(CHECKSUM_CLOSE_TAG))
+			return 67;
 		
 		return IN_VALID; // other case!
 	}

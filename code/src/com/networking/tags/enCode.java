@@ -175,13 +175,9 @@ public class enCode {
 		return Tags.FILE_REQ_OPEN_TAG + name + Tags.FILE_REQ_END_TAG;
 	}
 	
-	/*
-	public static String sendKey(String key){
-		return Tags.KEY_OPEN_TAG + key + Tags.KEY_CLOSE_TAG;
+	public static String sendChecksum(String checksum){
+		return Tags.CHECKSUM_OPEN_TAG + checksum + Tags.CHECKSUM_CLOSE_TAG;
 	}
 	
-	public static String sendIv(String iv){
-		return Tags.IV_OPEN_TAG + iv + Tags.IV_CLOSE_TAG;
-	}
-	*/
+	
 }
