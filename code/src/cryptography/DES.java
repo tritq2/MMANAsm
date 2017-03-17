@@ -18,10 +18,16 @@ public class DES {
 	private KeyGenerator keygenerator;
 	private IvParameterSpec iv ;
 	private final String INSTANCE_CYPHER = "DES/CBC/PKCS5Padding";
-	 
+	private final String INSTANCE_NOIV_CYPHER = "DES/ECB/PKCS5Padding";
+	
 	public DES() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		keygenerator = KeyGenerator.getInstance("DES");
 		desCipher = Cipher.getInstance(INSTANCE_CYPHER);
+	}
+	
+	public DES(String cypherMode) throws NoSuchAlgorithmException, NoSuchPaddingException{
+		keygenerator = KeyGenerator.getInstance("DES");
+		desCipher = Cipher.getInstance(INSTANCE_NOIV_CYPHER);
 	}
 	
 	public Key generateKey(){
@@ -49,6 +55,17 @@ public class DES {
 		return desCipher.doFinal(ciphertext);
 	}
 	
+	public byte[] encryptNoIV(byte[] plaintext, Key key) throws InvalidKeyException,
+	IllegalBlockSizeException, BadPaddingException{
+		desCipher.init(Cipher.ENCRYPT_MODE, key);
+		return desCipher.doFinal(plaintext);
+	}
+	
+	public byte[] decryptNoIV(byte[] ciphertext, Key key) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+		desCipher.init(Cipher.DECRYPT_MODE, key);
+		return desCipher.doFinal(ciphertext);
+	}
+	
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException{
 		
 		/*DES des = new DES();
@@ -59,18 +76,16 @@ public class DES {
 		System.out.println("plain: " + new String(p));
 		*/
 		
-		DES des = new DES();
+		DES des = new DES("noiv");
 		String key_str = "12345678";
 		Key key = Convert.Bytes2Key(key_str.getBytes(), "DES");
 		//Key key = des.generateKey();
 		String plaintext = "I'm vuthede";
 		byte[] key_byte = Convert.Key2Bytes(key);
-		byte[] cbyte = des.encrypt(plaintext.getBytes(), key);
+		byte[] cbyte = des.encryptNoIV(plaintext.getBytes(), key);
 		IvParameterSpec iv = des.getIv();
 		
-		
-		
-		String ctext = new String(des.decrypt(cbyte, Convert.Bytes2Key(key_byte, "DES"),iv));
+		String ctext = new String(des.decryptNoIV(cbyte, key));
 		System.out.println(ctext);
 		
 		

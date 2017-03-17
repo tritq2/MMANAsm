@@ -5,9 +5,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -36,7 +35,6 @@ import java.awt.TextArea;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,9 +49,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 
 import javax.swing.JProgressBar;
 import javax.swing.JPanel;
@@ -241,14 +237,18 @@ public class ChatApp {
 		label.setBounds(10, 21, 49, 22);
 		panelFile.add(label);
 		
-		JRadioButton rdbtnAlg = new JRadioButton("DES");
-		rdbtnAlg.setSelected(true);
-		rdbtnAlg.setBounds(80, 50, 109, 23);
-		panelFile.add(rdbtnAlg);
+		final JRadioButton rdbtnDES = new JRadioButton("DES");
+		rdbtnDES.setSelected(true);
+		rdbtnDES.setBounds(80, 50, 109, 23);
+		panelFile.add(rdbtnDES);
 		
-		JRadioButton rdbtnNewRadioButton_1 = new JRadioButton("AES");
-		rdbtnNewRadioButton_1.setBounds(191, 50, 109, 23);
-		panelFile.add(rdbtnNewRadioButton_1);
+		JRadioButton rdbtnAES = new JRadioButton("AES");
+		rdbtnAES.setBounds(191, 50, 109, 23);
+		panelFile.add(rdbtnAES);
+		
+		ButtonGroup cryptAlgBtnGroup = new ButtonGroup();
+		cryptAlgBtnGroup.add(rdbtnAES);
+		cryptAlgBtnGroup.add(rdbtnDES);
 		
 		JButton btnEncrypt = new JButton("Encrypt");
 		btnEncrypt.addActionListener(new ActionListener() {
@@ -268,79 +268,118 @@ public class ChatApp {
 				if (result == JFileChooser.APPROVE_OPTION) {
 					String pathSaveEncryptFile = fileChooser.getSelectedFile().getAbsolutePath();
 					String key_str = "12345678";
-					DES des = null;
-					try {
-						des = new DES();
-					} catch (NoSuchAlgorithmException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (NoSuchPaddingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					Key key = Convert.Bytes2Key(key_str.getBytes(), "DES");
-
-					//read file to bytes - > InputFiledata
-					Path pathObj = Paths.get(path);
-					byte[] InputFiledata = null;
-					try {
-						InputFiledata = Files.readAllBytes(pathObj);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					//get output file name:
-					String encryptFileName = pathSaveEncryptFile+'\\' + pathObj.getFileName().toString() + ".encrypted";
-					// create new file to flush encrypted bytes data
-					File encryptedFile = new File(encryptFileName);
-					FileOutputStream outputStream = null;
-					try {
-						outputStream = new FileOutputStream(encryptedFile);
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					// get data encypted
-					byte[] outputBytes = null;
-					try {
-						outputBytes = des.encrypt(InputFiledata, key);
-					} catch (InvalidKeyException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (NoSuchAlgorithmException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (NoSuchPaddingException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IllegalBlockSizeException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (BadPaddingException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-					// write output file
-					try {
-						outputStream.write(outputBytes);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 					
-					// System.console().printf(pathSaveEncryptFile);
-					return;
+					if(rdbtnDES.isSelected()){
+						try {
+							DESEncyptLocalFile(key_str,path, pathSaveEncryptFile);
+						} catch (InvalidKeyException e) {
+							e.printStackTrace();
+						} catch (IllegalBlockSizeException e) {
+							e.printStackTrace();
+						} catch (BadPaddingException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (NoSuchAlgorithmException e) {
+							e.printStackTrace();
+						} catch (NoSuchPaddingException e) {
+							e.printStackTrace();
+						}
+						return;
+						
+					}
+					else{
+						try {
+							AESEncryptLocalFile(key_str,path, pathSaveEncryptFile);
+						} catch (InvalidKeyException e) {
+							e.printStackTrace();
+						} catch (NoSuchAlgorithmException e) {
+							e.printStackTrace();
+						} catch (NoSuchPaddingException e) {
+							e.printStackTrace();
+						} catch (IllegalBlockSizeException e) {
+							e.printStackTrace();
+						} catch (BadPaddingException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return;
+					}
 				}
 			}
 		});
+		
 		btnEncrypt.setBounds(397, 49, 72, 25);
 		panelFile.add(btnEncrypt);
 		
 		JButton btnDecrypt = new JButton("Decrypt");
+		btnDecrypt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//decrypt file in here:
+				String path = textPath.getText();
+				//File fileData = new File(path);
+				if(path == null ||path.equals("")){
+					Tags.show(frame,"You haven't choosen file to dencrypt yet!", false);
+					return;
+				}
+				
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				
+				int result = fileChooser.showSaveDialog(frame);
+				
+				if (result == JFileChooser.APPROVE_OPTION) {
+					String pathSaveDecryptFile = fileChooser.getSelectedFile().getAbsolutePath();
+					String key_str = "12345678";
+
+					Path pathObj = Paths.get(path);
+					String inputFileName = pathObj.getFileName().toString();
+					
+					if(inputFileName.contains("DESencrypted")){
+						try {
+							DESDecyptLocalFile(key_str,path,pathSaveDecryptFile);
+						} catch (NoSuchAlgorithmException e1) {
+							e1.printStackTrace();
+						} catch (NoSuchPaddingException e1) {
+							e1.printStackTrace();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						} catch (InvalidKeyException e) {
+							e.printStackTrace();
+						} catch (IllegalBlockSizeException e) {
+							e.printStackTrace();
+						} catch (BadPaddingException e) {
+							e.printStackTrace();
+						}
+						return;
+						
+					}
+					else if(inputFileName.contains("AESencrypted")){
+						try {
+							AESDecryptLocalFile(key_str,path,pathSaveDecryptFile);
+						} catch (InvalidKeyException e) {
+							e.printStackTrace();
+						} catch (NoSuchAlgorithmException e) {
+							e.printStackTrace();
+						} catch (NoSuchPaddingException e) {
+							e.printStackTrace();
+						} catch (IllegalBlockSizeException e) {
+							e.printStackTrace();
+						} catch (BadPaddingException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						return;
+					}
+					else{
+						//todo something catch err or another algorithms
+					}
+				}
+			}
+		});
 		btnDecrypt.setBounds(473, 50, 72, 23);
 		panelFile.add(btnDecrypt);
 
@@ -739,5 +778,97 @@ public class ChatApp {
 		if (fileTemp.exists()) {
 			fileTemp.delete();
 		}
+	}
+	
+	public void DESEncyptLocalFile(String keyString,String pathPlainFile, String pathSaveEncryptFile) 
+	throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException, NoSuchAlgorithmException, NoSuchPaddingException{
+		
+
+		des = new DES("noiv");
+
+		Key key = Convert.Bytes2Key(keyString.getBytes(), "DES");
+		
+		Path pathObj = Paths.get(pathPlainFile);
+		byte[] InputFiledata = null;
+		InputFiledata = Files.readAllBytes(pathObj);
+		
+		String encryptFileName = "";
+		encryptFileName = pathSaveEncryptFile+'\\' + pathObj.getFileName().toString() + ".DESencrypted";
+		
+		File encryptedFile = new File(encryptFileName);
+		FileOutputStream outputStream = null;
+		outputStream = new FileOutputStream(encryptedFile);
+		byte[] outputBytes = null;
+		outputBytes = des.encryptNoIV(InputFiledata, key);
+		outputStream.write(outputBytes);
+		return;
+	}
+	
+	public void AESEncryptLocalFile(String keyString,String pathPlainFile, String pathSaveEncryptFile) 
+			throws NoSuchAlgorithmException, NoSuchPaddingException, IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+		
+		aes = new AES("noiv");
+
+		Key key = Convert.Bytes2Key(keyString.getBytes(), "AES");
+		Path pathObj = Paths.get(pathPlainFile);
+		
+		byte[] InputFiledata = null;
+		InputFiledata = Files.readAllBytes(pathObj);
+		String encryptFileName = pathSaveEncryptFile+'\\' + pathObj.getFileName().toString() + ".AESencrypted";
+		File encryptedFile = new File(encryptFileName);
+		FileOutputStream outputStream = null;
+		outputStream = new FileOutputStream(encryptedFile);
+		byte[] outputBytes = null;
+		outputBytes = aes.encryptNoIV(InputFiledata, key);
+		outputStream.write(outputBytes);
+		
+		return;
+		
+		
+	}
+	
+	public void DESDecyptLocalFile(String keyString,String pathCipherFile, String pathSaveDecryptFile) 
+			throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+		Path pathObj = Paths.get(pathCipherFile);
+	
+		byte[] InputFiledata = null;
+		String decryptFileName = "";
+		InputFiledata = Files.readAllBytes(pathObj);
+		
+		des = new DES("noiv");
+
+		Key key = Convert.Bytes2Key(keyString.getBytes(), "DES");
+		decryptFileName = pathSaveDecryptFile+'\\' + pathObj.getFileName().toString().replace(".DESencrypted","");
+		File decryptedFile = new File(decryptFileName);
+		
+		FileOutputStream outputStream  = new FileOutputStream(decryptedFile);
+		//outputStream = new FileOutputStream(decryptedFile);
+		byte[] outputBytes = null;
+		outputBytes = des.decryptNoIV(InputFiledata, key);
+		outputStream.write(outputBytes);
+		
+		return;
+	}
+	
+	public void AESDecryptLocalFile(String keyString, String pathCipherFile, String pathSaveDecryptFile) 
+			throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+		
+		Path pathObj = Paths.get(pathCipherFile);
+		
+		byte[] InputFiledata = null;
+		String decryptFileName = "";
+		InputFiledata = Files.readAllBytes(pathObj);
+		AES aes = new AES("noiv");
+		
+		Key key = Convert.Bytes2Key(keyString.getBytes(), "AES");
+		decryptFileName = pathSaveDecryptFile+ "\\" + pathObj.getFileName().toString().replace(".AESencrypted","");
+		File decryptedFile = new File(decryptFileName);
+		FileOutputStream outputStream  = null;
+		outputStream = new FileOutputStream(decryptedFile);
+		byte[] outputBytes = null;
+		outputBytes = aes.decryptNoIV(InputFiledata, key);
+		
+		outputStream.write(outputBytes);
+		return;
 	}
 }

@@ -17,13 +17,19 @@ public class AES {
 	private KeyGenerator keygenerator;
 	private IvParameterSpec iv ;
 	private final String INSTANCE_CYPHER = "AES/CBC/PKCS5Padding";
-
+	private final String INSTANCE_NOIV_CYPHER = "AES/ECB/PKCS5Padding";
+	
 	public AES() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		keygenerator = KeyGenerator.getInstance("AES");
 		aesCipher = Cipher.getInstance(INSTANCE_CYPHER);
 		
 	}
-
+	
+	public AES(String cipherMode) throws NoSuchAlgorithmException, NoSuchPaddingException{
+		keygenerator = KeyGenerator.getInstance("AES");
+		aesCipher = Cipher.getInstance(INSTANCE_NOIV_CYPHER);
+	}
+	
 	public Key generateKey() {
 		return keygenerator.generateKey();
 	}
@@ -42,10 +48,20 @@ public class AES {
 		setIv(Convert.Bytes2Iv(aesCipher.getIV()));
 		return aesCipher.doFinal(plaintext);
 	}
-
+	
+	public byte[] encryptNoIV(byte[] plaintext, Key key) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException{
+		aesCipher.init(Cipher.ENCRYPT_MODE, key);
+		return aesCipher.doFinal(plaintext);
+	}
+	
 	public byte[] decrypt(byte[] ciphertext, Key key, IvParameterSpec Iv )
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 		aesCipher.init(Cipher.DECRYPT_MODE, key, Iv);
+		return aesCipher.doFinal(ciphertext);
+	}
+	
+	public byte[] decryptNoIV(byte[] ciphertext, Key key) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException{
+		aesCipher.init(Cipher.DECRYPT_MODE, key);
 		return aesCipher.doFinal(ciphertext);
 	}
 	
