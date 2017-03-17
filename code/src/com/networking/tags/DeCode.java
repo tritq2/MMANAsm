@@ -475,4 +475,20 @@ public class DeCode {
 	}
 
 	private static Pattern feedBack = Pattern.compile(Tags.FILE_REQ_ACK_OPEN_TAG + ".*" + Tags.FILE_REQ_ACK_CLOSE_TAG);
+	
+	public static String receiveChecksum(String msg){
+		String checksum = msg.substring(Tags.CHECKSUM_OPEN_TAG.length(), msg.length() - Tags.CHECKSUM_CLOSE_TAG.length());
+		return checksum;
+	}
+	
+	public static boolean check_checksum(String msg){
+		if (checksum_msg.matcher(msg).matches())
+			return true;
+		else return false;
+	}
+	
+	private static Pattern checksum_msg = Pattern.compile(Tags.CHECKSUM_OPEN_TAG + ".*" + Tags.CHECKSUM_CLOSE_TAG ); 
+	
+	
+	
 }

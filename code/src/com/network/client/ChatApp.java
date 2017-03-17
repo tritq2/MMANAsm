@@ -23,6 +23,7 @@ import com.networking.tags.enCode;
 import cryptography.AES;
 import cryptography.Convert;
 import cryptography.DES;
+import cryptography.MD5;
 
 import com.networking.tags.Tags;
 
@@ -78,7 +79,9 @@ public class ChatApp {
 	private JPanel panelFile;
 	public DES des;
 	public AES aes;
-	
+	public Key keyForDecryptReceiveFile;
+	public IvParameterSpec ivForDecrytReceiveFile;
+	public String checksumReceiveFile = "";
 
 	public ChatApp(String user, String guest, Socket socket, int port) {
 		nameUser = user;
@@ -137,13 +140,13 @@ public class ChatApp {
 		this.portServer = port;
 		des = new DES();
 		aes = new AES();
-		
-		//Get publickey of guess
-		System .out.println("size of peer in file Chatapp: " + Peer.peer.size() );
+
+		// Get publickey of guess
+		System.out.println("size of peer in file Chatapp: " + Peer.peer.size());
 		System.out.println("namequest: " + nameGuest);
-		for (int i = 0; i< Peer.peer.size() ; i++){
-			System.out.println("name loop: "+ Peer.peer.get(i).getName());
-			if(Peer.peer.get(i).getName().equals(nameGuest)){
+		for (int i = 0; i < Peer.peer.size(); i++) {
+			System.out.println("name loop: " + Peer.peer.get(i).getName());
+			if (Peer.peer.get(i).getName().equals(nameGuest)) {
 				System.out.println("found namequest: " + nameGuest);
 				guessKey = Peer.peer.get(i).getPublicKey();
 				if (guessKey != null)
@@ -236,35 +239,35 @@ public class ChatApp {
 		Label label = new Label("Path : ");
 		label.setBounds(10, 21, 49, 22);
 		panelFile.add(label);
-		
+
+
 		final JRadioButton rdbtnDES = new JRadioButton("DES");
 		rdbtnDES.setSelected(true);
 		rdbtnDES.setBounds(80, 50, 109, 23);
 		panelFile.add(rdbtnDES);
-		
+
 		JRadioButton rdbtnAES = new JRadioButton("AES");
 		rdbtnAES.setBounds(191, 50, 109, 23);
 		panelFile.add(rdbtnAES);
-		
+
 		ButtonGroup cryptAlgBtnGroup = new ButtonGroup();
 		cryptAlgBtnGroup.add(rdbtnAES);
 		cryptAlgBtnGroup.add(rdbtnDES);
-		
 		JButton btnEncrypt = new JButton("Encrypt");
 		btnEncrypt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				// code encrypt here:
 				String path = textPath.getText();
-				//File fileData = new File(path);
-				if(path == null ||path.equals("")){
-					Tags.show(frame,"You haven't choosen file to encrypt yet!", false);
+				// File fileData = new File(path);
+				if (path == null || path.equals("")) {
+					Tags.show(frame, "You haven't choosen file to encrypt yet!", false);
 					return;
 				}
 				JFileChooser fileChooser = new JFileChooser();
 				fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int result = fileChooser.showSaveDialog(frame);
-				
+
 				if (result == JFileChooser.APPROVE_OPTION) {
 					String pathSaveEncryptFile = fileChooser.getSelectedFile().getAbsolutePath();
 					String key_str = "12345678";
@@ -306,13 +309,15 @@ public class ChatApp {
 						}
 						return;
 					}
+
+					// System.console().printf(pathSaveEncryptFile);
 				}
 			}
 		});
 		
 		btnEncrypt.setBounds(397, 49, 72, 25);
 		panelFile.add(btnEncrypt);
-		
+
 		JButton btnDecrypt = new JButton("Decrypt");
 		btnDecrypt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -412,7 +417,7 @@ public class ChatApp {
 				try {
 					String algorithm = "DES";
 					Key key = des.generateKey();
-					String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(),key ));
+					String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(), key));
 					IvParameterSpec iv = des.getIv();
 					System.out.println("File ChatApp. Before encrypt key");
 					if (guessKey == null)
@@ -458,14 +463,15 @@ public class ChatApp {
 					try {
 						String algorithm = "DES";
 						Key key = des.generateKey();
-						String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(),key ));
+						String msg_cipher = Convert.Bytes2String(des.encrypt(msg.getBytes(), key));
 						IvParameterSpec iv = des.getIv();
 						System.out.println("File ChatApp. Before encrypt key");
 						if (guessKey == null)
 							System.out.println("guesskey = null");
 						String encryptedkey = Convert.Bytes2String(Login.rsa.encrypt(Convert.Key2Bytes(key), guessKey));
 						System.out.println("File ChatApp. After encryptkey");
-						chat.sendMessage(enCode.sendMessage(msg_cipher, algorithm, encryptedkey, Convert.Iv2String(iv)));
+						chat.sendMessage(
+								enCode.sendMessage(msg_cipher, algorithm, encryptedkey, Convert.Iv2String(iv)));
 						updateChat("[ME]	:" + msg);
 						textSend.setText("");
 						textSend.setCaretPosition(0);
@@ -521,17 +527,17 @@ public class ChatApp {
 		private ObjectOutputStream outPeer;
 		private ObjectInputStream inPeer;
 		private boolean continueSendFile = true, finishReceive = false;
-		private int sizeOfSend = 0, sizeOfData = 0, sizeFile = 0, sizeReceive = 0;
+		private int sizeOfSend = 0, sizeOfData = 0,  sizeReceive = 0;
+		private long sizeFile = 0;
 		private String nameFileReceive = "";
 		private InputStream inFileSend;
 		private DataFile dataFile;
-		
 
 		public ChatRoom(Socket connection, String name, String guest) throws Exception {
 			connect = new Socket();
 			connect = connection;
 			nameGuest = guest;
-			
+
 		}
 
 		@Override
@@ -557,9 +563,10 @@ public class ChatApp {
 									true);
 							if (result == 0) {
 								File fileReceive = new File(URL_DIR + TEMP + "/" + nameFileReceive);
-								
-								//System.out.println("đồng ý tải về"+URL_DIR + TEMP + "/" + nameFileReceive);
-								
+
+								// System.out.println("đồng ý tải về"+URL_DIR +
+								// TEMP + "/" + nameFileReceive);
+
 								if (!fileReceive.exists()) {
 									fileReceive.createNewFile();
 								}
@@ -580,41 +587,79 @@ public class ChatApp {
 										updateChat("you are sending file : " + nameFile);
 										isSendFile = false;
 										sendFile(textPath.getText());
+
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
 								}
 							}).start();
-						} else if (msgObj.equals(Tags.FILE_REQ_NOACK_TAG)) { //cancel send file
+						} else if (DeCode.check_checksum(msgObj)) {
+							checksumReceiveFile = DeCode.receiveChecksum(msgObj);
+						}
+
+						else if (msgObj.equals(Tags.FILE_REQ_NOACK_TAG)) { // cancel
+																			// send
+																			// file
 							Tags.show(frame, nameGuest + " wantn't receive file", false);
-							
-							
-						} else if (msgObj.equals(Tags.FILE_DATA_BEGIN_TAG)) { //receiving file
+
+						} else if (msgObj.equals(Tags.FILE_DATA_BEGIN_TAG)) { // receiving
+																				// file
 							finishReceive = false;
 							lblReceive.setVisible(true);
 							out = new FileOutputStream(URL_DIR + TEMP + nameFileReceive);
-							
-							
-						} else if (msgObj.equals(Tags.FILE_DATA_END_TAG)) { // received file
-							updateChat(
-									"You receive file " + nameFileReceive 
-									+ " with total: " + sizeReceive + "KB");
-							sizeReceive = 0;
-							out.flush();
-							out.close();
-							lblReceive.setVisible(false);
-							new Thread(new Runnable() {
-								@Override
-								public void run() {
-									showSaveFile();
+
+						} else if (msgObj.equals(Tags.FILE_DATA_END_TAG)) { // received
+																			// file
+							String checksumLocal = Convert
+									.Bytes2String(MD5.getchecksumOfFile(URL_DIR + TEMP + nameFileReceive));
+
+							System.out.println("checksumLocal: " + checksumLocal);
+							System.out.println("checksumOriginal: " + checksumReceiveFile);
+							if (checksumLocal.equals(checksumReceiveFile)) {
+								updateChat(
+										"You receive file " + nameFileReceive + " with total: " + sizeReceive + "KB" +
+										"\n ChecksumLocal: " + checksumLocal +
+										"\n ChecksumOriginal: " + checksumReceiveFile
+										);
+								sizeReceive = 0;
+								out.flush();
+								out.close();
+								lblReceive.setVisible(false);
+								new Thread(new Runnable() {
+									@Override
+									public void run() {
+										showSaveFile();
+									}
+								}).start();
+							}
+							else {
+								int choose = Tags.show(frame, "File you have recently received is not interity! Do you want to save it", true);
+								if(choose == 0){
+									updateChat(
+											"You receive file " + nameFileReceive + " with total: " + sizeReceive + "KB");
+									sizeReceive = 0;
+									out.flush();
+									out.close();
+									lblReceive.setVisible(false);
+									new Thread(new Runnable() {
+										@Override
+										public void run() {
+											showSaveFile();
+										}
+									}).start();
 								}
-							}).start();
+								else {
+									File fileTemp = new File(URL_DIR + TEMP + nameFileReceive);
+									if (fileTemp.exists()) {
+										fileTemp.delete();
+									}
+								}
+							}
 							finishReceive = true;
-						}
-						else {
+						} else {
 							ArrayList<String> message = DeCode.getMessage(msgObj);
 							System.out.println("receive raw mesage: " + msgObj);
-							if (message ==null)
+							if (message == null)
 								System.out.println("massage is null!!!");
 							String ctext = message.get(0);
 							System.out.println("ctext: " + ctext);
@@ -624,20 +669,29 @@ public class ChatApp {
 							System.out.println("message.get(2): " + message.get(2));
 							String encryptedkey = message.get(2);
 							System.out.println("encryptedKey: " + encryptedkey);
-							String key = Convert.Bytes2String(Login.rsa.decrypt(Convert.StringToBytes(encryptedkey), 
-													Login.keyRSA.getPrivate()));
+							String key = Convert.Bytes2String(
+									Login.rsa.decrypt(Convert.StringToBytes(encryptedkey), Login.keyRSA.getPrivate()));
 							System.out.println("key: " + key);
 							String iv = message.get(3);
 							System.out.println("iv: " + iv);
-							String ptext = new String(des.decrypt(Convert.StringToBytes(ctext), 
+							String ptext = new String(des.decrypt(Convert.StringToBytes(ctext),
 									Convert.String2Key(key, "DES", true), Convert.String2Iv(iv)));
 							System.out.println("ptext: " + ptext);
 							updateChat("[" + nameGuest + "]	:" + ptext);
 						}
 					} else if (obj instanceof DataFile) {
 						DataFile data = (DataFile) obj;
+						byte[] encrypedmsg = data.data;
+						String key_str_encrypt = data.encryptedkey;
+						String iv_str = data.iv;
+						String key_str_decrypted = Convert.Bytes2String(
+								Login.rsa.decrypt(Convert.StringToBytes(key_str_encrypt), Login.keyRSA.getPrivate()));
+
+						byte[] decryptmsg = aes.decrypt(encrypedmsg, Convert.String2Key(key_str_decrypted, "AES", true),
+								Convert.String2Iv(iv_str));
+
 						++sizeReceive;
-						out.write(data.data);
+						out.write(decryptmsg);
 					}
 				} catch (Exception e) {
 					File fileTemp = new File(URL_DIR + TEMP + nameFileReceive);
@@ -651,60 +705,95 @@ public class ChatApp {
 		private void getData(String path) throws Exception {
 			File fileData = new File(path);
 			if (fileData.exists()) {
+
 				sizeOfSend = 0;
-				dataFile = new DataFile();
-				sizeFile = (int) fileData.length();
-				sizeOfData = sizeFile % 1024 == 0 ? (int) (fileData.length() / 1024)
-						: (int) (fileData.length() / 1024) + 1;
+				sizeFile =  fileData.length();
+				sizeOfData = sizeFile % (1024 * 1024) == 0 ? (int) (fileData.length() / (1024 * 1024))
+						: (int) (fileData.length() / (1024 * 1024)) + 1;
+				System.out.println("size of data: " + sizeOfData);
 				textState.setVisible(true);
 				progressSendFile.setVisible(true);
 				progressSendFile.setValue(0);
+				System.out.println("path file: " + path);
 				inFileSend = new FileInputStream(fileData);
+				if (sizeFile < Tags.MAX_MSG_SIZE)
+					dataFile = new DataFile((int)sizeFile);
+				else
+					dataFile = new DataFile();
 			}
 		}
 
-		public void sendFile(String path) throws Exception { // apply encrypt algorithms here!!
+		public void sendFile(String path) throws Exception { // apply encrypt
+																// algorithms
+																// here!!
 			getData(path);
 			textState.setText("Sending ...");
 			do {
 				if (continueSendFile) {
 					continueSendFile = false;
-					new Thread(new Runnable() {
+					// new Thread(new Runnable() {
 
-						@Override
-						public void run() {
-							try {
-								inFileSend.read(dataFile.data);
-								sendMessage(dataFile);
-								sizeOfSend++;
-								if (sizeOfSend == sizeOfData - 1) {
-									int size = sizeFile - sizeOfSend * 1024;
-									dataFile = new DataFile(size);
-								}
-								progressSendFile.setValue((int) (sizeOfSend * 100 / sizeOfData));
-								if (sizeOfSend >= sizeOfData) {
-									inFileSend.close();
-									isSendFile = true;
-									sendMessage(Tags.FILE_DATA_END_TAG);
-									
-									//System.out.println("ket thuc gui file");
-									
-									progressSendFile.setVisible(false);
-									textState.setVisible(false);
-									isSendFile = false;
-									textPath.setText("");
-									btnChoose.setEnabled(true);
-									btnUpLoad.setEnabled(true);
-									updateChat("... SUCCESSFUL");
-									inFileSend.close();
-								}
-								continueSendFile = true;
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+					// @Override
+					// public void run() {
+					try {
+						System.out.println("before read byte to dataFile");
+						int sobyte = inFileSend.read(dataFile.data);
+						System.out.println("after read byte to data file: " + dataFile.data.length);
+						System.out.println("so byte:" + sobyte);
+						String algorithm = "AES";
+
+						Key key = aes.generateKey();
+						System.out.println("generatekey success");
+						byte[] msg_cipher = aes.encrypt(dataFile.data, key);
+						System.out.println("encrypt sucess");
+						IvParameterSpec iv = aes.getIv();
+						System.out.println("get ic success");
+						String encryptedkey = Convert.Bytes2String(Login.rsa.encrypt(Convert.Key2Bytes(key), guessKey));
+						System.out.println("convert and encrypt ey success");
+						DataFile encrypted_datafile = new DataFile(msg_cipher, encryptedkey, Convert.Iv2String(iv));
+						System.out.println("new data file success");
+						sendMessage(encrypted_datafile);
+						System.out.println("send message success");
+						sizeOfSend++;
+						System.out.println("size of Send: " + sizeOfSend);
+
+						if (sizeOfSend == 1 && sizeOfSend < sizeOfData - 1)
+							dataFile = new DataFile();
+
+						if (sizeOfSend == sizeOfData - 1) {
+							long size = sizeFile - sizeOfSend * 1024 * 1024;
+							dataFile = new DataFile((int)size);
 						}
-					}).start();
+						System.out.println("truoc khi thanhg trnag thai");
+						progressSendFile.setValue((int) (sizeOfSend * 100 / sizeOfData));
+						System.out.println("sau khi thanhg trnag thai");
+						if (sizeOfSend >= sizeOfData) {
+							inFileSend.close();
+							isSendFile = true;
+
+							String checksum = Convert.Bytes2String(MD5.getchecksumOfFile(path));
+							sendMessage(enCode.sendChecksum(checksum));
+							
+							sendMessage(Tags.FILE_DATA_END_TAG);
+							// System.out.println("ket thuc gui file");
+
+							progressSendFile.setVisible(false);
+							textState.setVisible(false);
+							isSendFile = false;
+							textPath.setText("");
+							btnChoose.setEnabled(true);
+							btnUpLoad.setEnabled(true);
+							updateChat("... SUCCESSFUL");
+							inFileSend.close();
+						}
+						continueSendFile = true;
+						System.out.println("Chuan bi lap tiep");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
+				// }).start();
+
 			} while (sizeOfSend < sizeOfData);
 		}
 
@@ -715,8 +804,7 @@ public class ChatApp {
 				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int result = fileChooser.showSaveDialog(frame);
 				if (result == JFileChooser.APPROVE_OPTION) {
-					File file = new File(
-							fileChooser.getSelectedFile().getAbsolutePath()+"/"+nameFileReceive);
+					File file = new File(fileChooser.getSelectedFile().getAbsolutePath() + "/" + nameFileReceive);
 					if (!file.exists()) {
 						try {
 							file.createNewFile();
@@ -729,8 +817,7 @@ public class ChatApp {
 						}
 						break;
 					} else {
-						int resultContinue = Tags.show(
-								frame, "File is exists. You want save file?", true);
+						int resultContinue = Tags.show(frame, "File is exists. You want save file?", true);
 						if (resultContinue == 0) {
 							continue;
 						} else {

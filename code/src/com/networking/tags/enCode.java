@@ -174,4 +174,10 @@ public class enCode {
 	public static String sendFile(String name) {
 		return Tags.FILE_REQ_OPEN_TAG + name + Tags.FILE_REQ_END_TAG;
 	}
+	
+	public static String sendChecksum(String checksum){
+		return Tags.CHECKSUM_OPEN_TAG + checksum + Tags.CHECKSUM_CLOSE_TAG;
+	}
+	
+	
 }
